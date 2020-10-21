@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  
+  
+  
+  <entry>
+    <title>Docker Remote API</title>
+    <link href="/2020/03/31/Docker%20Remote%20API/"/>
+    <url>/2020/03/31/Docker%20Remote%20API/</url>
+    
+    <content type="html"><![CDATA[<p>Docker Remote API 笔记记录</p><a id="more"></a><p>1、安装curl和jq 来发送API</p><pre><code>wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64mv jq-linux64 /usr/local/bin/jqchmod +x /usr/local/bin/jq</code></pre><p>2、API官方文档</p><pre><code>https://docs.docker.com/engine/reference/api/docker_remote_api_v1.24/</code></pre><p>3、API范例</p><ol><li><p>查看集群节点</p><pre><code> 1、  curl \       --unix-socket /var/run/docker.sock  \       http:/nodes | jq &#39;.&#39;  2、 curl \        --unix-socket /var/run/docker.sock \        http:/nodes/swarm-1 | jq &#39;.&#39;</code></pre></li><li><p>创建新服务</p><pre><code> curl -XPOST \    -d &#39;&#123;   &quot;Name&quot;: &quot;go-demo-db&quot;,   &quot;TaskTemplate&quot;:&#123;&quot;ContainerSpec&quot;:&#123;&quot;Image&quot;:&quot;mongo:3.2.10&quot;&#125;&#125;   &#125; &#39;\   --unix-socket /var/run/docker.sock \   http:/services/create | jq &#39;.&#39;</code></pre></li><li><p>查看服务状态</p><pre><code> curl --unix-socket /var/run/docker.sock   http:/services/go-demo-db | jq &#39;.&#39;</code></pre></li><li><p>查看服务的特定参数</p><p> 服务版本：</p><pre><code> VERSION=$(curl --unix-socket /var/run/docker.sock   http:/services/go-demo-db | jq &#39;.Version.Index&#39;)</code></pre><p> 服务ID：</p><pre><code> ID=$(curl --unix-socket /var/run/docker.sock   http:/services/go-demo-db | jq --raw-output &#39;.ID&#39;) #--raw-output去掉冒号&quot;&quot;</code></pre></li></ol><ol><li><p>更新服务参数</p><pre><code> curl -XPOST\   -d &#39;&#123;   &quot;Name&quot;: &quot;go-demo-db-1&quot;,   &quot;TaskTemplate&quot;:&#123;&quot;ContainerSpec&quot;:&#123;&quot;Image&quot;:&quot;mongo:3.2.10&quot;&#125;&#125;,   &quot;Mode&quot;:&#123;&quot;Replicated&quot;:&#123;&quot;Replicas&quot;:3&#125;&#125;   &#125; &#39;\   --unix-socket /var/run/docker.sock \   http:/services/$ID/update?version=$VERSION</code></pre></li><li><p>获取容器的统计数据</p><pre><code> curl --unix-socket /var/run/docker.sock   http:/containers/a586e70a2f22/stats 这个统计是流式的，禁用流式用stram参数 curl --unix-socket /var/run/docker.sock   http:/containers/a586e70a2f22/stats?stream=false</code></pre></li><li><p>删除服务</p><pre><code> curl -XDELETE --unix-socket /var/run/docker.sockhttp:/services/go-demo-db</code></pre></li></ol>]]></content>
+    
+    
+    <categories>
+      
+      <category>docker</category>
+      
+      <category>swarm</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>docker</tag>
+      
+      <tag>Docker API</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  
+</search>
